@@ -1,0 +1,154 @@
+@XmlRootElement(name = "result")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Result {
+    @XmlAttribute(name = "resultCode")
+    private int resultCode;
+
+    @XmlElement(name = "visualProUserInfo")
+    private VisualProUserInfo visualProUserInfo;
+
+    // Getters and setters
+}
+
+package com.little.bilihub.ydcloud.bean;
+
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+
+@XmlAccessorType(XmlAccessType.FIELD)
+public class VisualProUserInfo {
+    @XmlElementWrapper(name = "qryInfoList")
+    @XmlElement(name = "qryInfo")
+    private List<QryInfo> qryInfoList;
+
+    // Getters and setters
+
+    @XmlAccessorType(XmlAccessType.FIELD)
+    public class QryInfo {
+        @XmlElement(name = "name")
+        private String name;
+
+        @XmlElement(name = "value")
+        private String value;
+
+        // Getters and setters
+    }
+}
+
+
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.Headers;
+import retrofit2.http.POST;
+
+public interface ApiService {
+
+    @Headers({
+        "Content-Type: text/xml;UTF-8",
+        "User-Agent: Java/1.6.0_25",
+        "Host: XX.XX.XX.XX:XX",
+        "Accept: text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2",
+        "Connection: keep-alive",
+        "Content-Length: 72",
+        "appid: 2021032614360729",
+        "secretkey: af01a32907fc1585477eca1d20d9da29b8534d2458af528c6cbc8002d97dc647",
+        "accesstoken: S+Lf9ln3N8P5yyZPtANLBk63pwi3ENMi9RtkP9ZXABMYZTr4PQfkEi0/4VjOPdecMQeoRI8NDrRzIhGRuzsgqA==",
+        "deviceid: COsG2dEYnwyi8wYh",
+        "channelid: 10009"
+    })
+    @POST("richlifeApp/devapp/getUserInfo")
+    Call<ApiResponse> getUserInfo(@Body UserRequest request);
+}
+
+
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "getUserInfo")
+public class UserRequest {
+
+    @XmlElement(name = "qryType")
+    private int qryType;
+
+    public UserRequest(int qryType) {
+        this.qryType = qryType;
+    }
+    
+    // Getter and Setter methods
+}
+
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "result")
+public class ApiResponse {
+
+    @XmlElement(name = "visualProUserInfo")
+    private VisualProUserInfo userInfo;
+
+    // Getter and Setter methods
+}
+
+
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "visualProUserInfo")
+public class VisualProUserInfo {
+
+    @XmlElement(name = "msisdn")
+    private String msisdn;
+
+    @XmlElement(name = "userID")
+    private String userID;
+
+    @XmlElement(name = "areaCode")
+    private String areaCode;
+
+    @XmlElement(name = "qryInfoList")
+    private QryInfoList qryInfoList;
+
+    // Getter and Setter methods
+}
+
+
+
+import retrofit2.Retrofit;
+import retrofit2.converter.jaxb.JaxbConverterFactory;
+
+public class Main {
+
+    public static void main(String[] args) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://miniapp.yun.139.com/")
+                .addConverterFactory(JaxbConverterFactory.create())
+                .build();
+
+        ApiService apiService = retrofit.create(ApiService.class);
+
+        UserRequest request = new UserRequest(0);
+
+        Call<ApiResponse> call = apiService.getUserInfo(request);
+        try {
+            retrofit2.Response<ApiResponse> response = call.execute();
+            if (response.isSuccessful()) {
+                ApiResponse apiResponse = response.body();
+                VisualProUserInfo userInfo = apiResponse.getUserInfo();
+                
+                // 处理用户信息
+            } else {
+                // 请求失败处理
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
